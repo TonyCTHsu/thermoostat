@@ -5,3 +5,7 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+
+thermostat = Thermostat.create(household_token: 'household_token', location: 'location')
+
+thermostat.readings.create(number: 1, temperature: 1.1, humidity: 2.2, battery_charge: 3.3)
