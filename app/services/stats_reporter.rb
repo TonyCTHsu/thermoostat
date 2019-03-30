@@ -1,4 +1,4 @@
-class StatisticsService
+class StatsReporter
   def initialize(thermostat)
     @stats = thermostat.stats.value
   end
@@ -35,9 +35,9 @@ class StatisticsService
 
   def battery_charge_data
     {
-      max: @stats['max_humidity'].to_f,
-      min: @stats['min_humidity'].to_f,
-      average: @stats['humidity'].to_f/counter
+      max: @stats['max_battery_charge'].to_f,
+      min: @stats['min_battery_charge'].to_f,
+      average: @stats['battery_charge'].to_f/counter
     }
   end
 end

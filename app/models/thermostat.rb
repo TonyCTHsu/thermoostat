@@ -30,18 +30,15 @@ class Thermostat < ApplicationRecord
     end
   end
 
-  def fetch_reading(reading_number)
-    key = reading_cache_key(reading_number)
-    cached_attributes = Rails.cache.read(key)
-
-    if cached_attributes
-      Reading.new(cached_attributes)
-    else
-      readings.find_by(number: reading_number)
-    end
+  def present_stats
+    StatsReporter.new(self).call
   end
 
-  def reading_cache_key(reading_number)
-    "thermostats/#{id}/readings/#{reading_number}"
+  def generate_reading(attributes)
+    ReadingGenerator.new(self).call(attributes)
+  end
+
+  def fetch_reading(reading_number)
+    ReadingsFetcher.new(self).call(reading_number)
   end
 end

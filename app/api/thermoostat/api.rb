@@ -3,19 +3,21 @@ module Thermoostat
     format :json
     prefix :api
 
+    helpers do
+      def thermostat
+        @thermostat ||= Thermostat.find(params[:id])
+      end
+    end
+
     resources :thermostats do
       route_param :id do
         desc 'Returns stats from a thermostat'
         get '/stats' do
-          thermostat = Thermostat.find(params[:id])
-
-          StatisticsService.new(thermostat).call
+          thermostat.present_stats
         end
 
         desc 'Returns a reading.'
         get '/readings/:reading_id' do
-          thermostat = Thermostat.find(params[:id])
-
           reading = thermostat.fetch_reading(params[:reading_id])
 
           present reading, with: Entities::Reading
@@ -28,9 +30,7 @@ module Thermoostat
           requires :battery_charge, type: Float
         end
         post '/readings' do
-          thermostat = Thermostat.find(params[:id])
-
-          reading = BuildReadingService.new(thermostat).call(declared(params))
+          reading = thermostat.generate_reading(declared(params))
 
           present reading, with: Entities::Reading
         end
