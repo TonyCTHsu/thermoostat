@@ -13,4 +13,19 @@ class Thermostat < ApplicationRecord
       reading.number = stats.incr('counter')
     end
   end
+
+  def fetch_reading(reading_number)
+    key = reading_cache_key(reading_number)
+    cached_attributes = Rails.cache.read(key)
+
+    if cached_attributes
+      Reading.new(cached_attributes)
+    else
+      readings.find_by(number: reading_number)
+    end
+  end
+
+  def reading_cache_key(reading_number)
+    "thermostats/#{id}/readings/#{reading_number}"
+  end
 end

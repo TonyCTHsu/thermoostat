@@ -5,6 +5,15 @@ module Thermoostat
 
     resources :thermostats do
       route_param :id do
+        desc 'Returns a reading.'
+        get '/readings/:reading_id' do
+          thermostat = Thermostat.find(params[:id])
+
+          reading = thermostat.fetch_reading(params[:reading_id])
+
+          present reading, with: Entities::Reading
+        end
+
         desc 'Create a reading'
         params do
           requires :temperature, type: Float
