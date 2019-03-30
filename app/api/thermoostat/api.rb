@@ -5,6 +5,13 @@ module Thermoostat
 
     resources :thermostats do
       route_param :id do
+        desc 'Returns stats from a thermostat'
+        get '/stats' do
+          thermostat = Thermostat.find(params[:id])
+
+          StatisticsService.new(thermostat).call
+        end
+
         desc 'Returns a reading.'
         get '/readings/:reading_id' do
           thermostat = Thermostat.find(params[:id])
@@ -26,9 +33,6 @@ module Thermoostat
           reading = BuildReadingService.new(thermostat).call(declared(params))
 
           present reading, with: Entities::Reading
-        end
-
-        get :stats do
         end
       end
     end
