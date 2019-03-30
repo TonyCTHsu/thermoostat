@@ -3,7 +3,7 @@ require 'rails_helper'
 describe 'Thermoostat::API' do
   context 'GET /api/thermostats/:id/reading/:reading_id' do
     it 'returns stats' do
-      thermostat = double(id: 1)
+      thermostat = create(:thermostat)
       allow(Thermostat).to receive(:find).and_return(thermostat)
       expect(thermostat).to receive(:present_stats).and_return(
         temperature: {
@@ -23,7 +23,8 @@ describe 'Thermoostat::API' do
         }
       )
 
-      get "/api/thermostats/#{thermostat.id}/stats"
+      get "/api/thermostats/#{thermostat.id}/stats",
+          headers: { 'X-Household-Token' => thermostat.household_token }
 
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)).to eq(
@@ -44,6 +45,17 @@ describe 'Thermoostat::API' do
         }
       )
     end
+
+    context 'when unauthorized' do
+      it do
+        thermostat = create(:thermostat)
+
+        get "/api/thermostats/#{thermostat.id}/stats",
+            headers: { 'X-Household-Token' => 'unauthorized_token' }
+
+        expect(response.status).to eq(401)
+      end
+    end
   end
 
   context 'POST /api/thermostats/:id/readings' do
@@ -55,7 +67,8 @@ describe 'Thermoostat::API' do
         with(temperature: 1.1, humidity: 2.2, battery_charge: 3.3).and_return(reading)
 
       post "/api/thermostats/#{thermostat.id}/readings",
-        params: { temperature: 1.1, humidity: 2.2, battery_charge: 3.3 }
+           params: { temperature: 1.1, humidity: 2.2, battery_charge: 3.3 },
+           headers: { 'X-Household-Token' => thermostat.household_token }
 
       expect(response.status).to eq(201)
       expect(JSON.parse(response.body)).to eq(
@@ -64,6 +77,18 @@ describe 'Thermoostat::API' do
         'humidity' => reading.humidity,
         'battery_charge' => reading.battery_charge
       )
+    end
+
+    context 'when unauthorized' do
+      it do
+        thermostat = create(:thermostat)
+
+        post "/api/thermostats/#{thermostat.id}/readings",
+             params: { temperature: 1.1, humidity: 2.2, battery_charge: 3.3 },
+             headers: { 'X-Household-Token' => 'unauthorized_token' }
+
+        expect(response.status).to eq(401)
+      end
     end
   end
 
@@ -74,7 +99,8 @@ describe 'Thermoostat::API' do
       allow(Thermostat).to receive(:find).and_return(thermostat)
       expect(thermostat).to receive(:fetch_reading).with(reading.number.to_s).and_return(reading)
 
-      get "/api/thermostats/#{thermostat.id}/readings/#{reading.number}"
+      get "/api/thermostats/#{thermostat.id}/readings/#{reading.number}",
+          headers: { 'X-Household-Token' => thermostat.household_token }
 
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)).to eq(
@@ -83,6 +109,18 @@ describe 'Thermoostat::API' do
         'humidity' => reading.humidity,
         'battery_charge' => reading.battery_charge
       )
+    end
+
+    context 'when unauthorized' do
+      it do
+        thermostat = create(:thermostat)
+        reading = build(:reading, thermostat: thermostat, number: 2)
+
+        get "/api/thermostats/#{thermostat.id}/readings/#{reading.number}",
+            headers: { 'X-Household-Token' => 'unauthorized_token' }
+
+        expect(response.status).to eq(401)
+      end
     end
   end
 end

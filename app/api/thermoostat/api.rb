@@ -9,6 +9,11 @@ module Thermoostat
       end
     end
 
+    before do
+      error!('Unauthorized', 401) unless
+        Thermostat.where(id: params[:id], household_token: headers['X-Household-Token']).exists?
+    end
+
     resources :thermostats do
       route_param :id do
         desc 'Returns stats from a thermostat'
