@@ -24,6 +24,7 @@ module Thermoostat
 
     config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
     config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
+    config.autoload_paths << Rails.root.join('app', 'services')
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers
@@ -34,5 +35,6 @@ module Thermoostat
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+    config.active_job.queue_adapter = :sidekiq
   end
 end
